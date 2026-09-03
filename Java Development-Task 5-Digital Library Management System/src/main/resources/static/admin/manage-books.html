@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Manage Books</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <div class="toolbar">
+                    <div>
+                        <h1 style="margin:0">Manage Books</h1>
+                        <span class="muted">Add, edit or delete catalogue records.</span>
+                    </div>
+                    <button onclick="openAdd()">+ Add Book</button>
+                </div>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>ISBN</th>
+                                <th>Category</th>
+                                <th>Qty</th>
+                                <th>Available</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <div id="modal" class="modal">
+            <div class="card">
+                <h2 id="modalTitle">Add Book</h2>
+                <form id="bookForm">
+                    <input type="hidden" id="bookId">
+                    <label>Title</label>
+                    <input id="title" required>
+                    <label>Author</label>
+                    <input id="author" required>
+                    <label>ISBN</label>
+                    <input id="isbn" required>
+                    <label>Category</label>
+                    <input id="category" required>
+                    <label>Quantity</label>
+                    <input id="quantity" type="number" min="0" required>
+                    <div class="actions">
+                        <button>Save</button>
+                        <button type="button" class="secondary" onclick="closeModal()">Cancel</button>
+                    </div>
+                    <div id="msg" class="error"></div>
+                </form>
+            </div>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/admin.js"></script>
+        <script>
+
+let books=[];
+
+async function load() {
+    books = await API.get("/api/books");
+
+    rows.innerHTML =
+        books
+            .map(
+                b => `
+                    <tr>
+                        <td>
+                            <b>${esc(b.title)}</b>
+                        </td>
+                        <td>
+                            ${esc(b.author)}
+                        </td>
+                        <td>
+                            ${esc(b.isbn)}
+                        </td>
+                        <td>
+                            ${esc(b.category)}
+                        </td>
+                        <td>
+                            ${b.quantity}
+                        </td>
+                        <td>
+                            ${b.availableQuantity}
+                        </td>
+                        <td>
+                            <button
+                                type="button"
+                                class="secondary"
+                                onclick="openEdit(${b.id})"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                class="danger"
+                                onclick="removeBook(${b.id})"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `
+            )
+            .join("") ||
+        '<tr><td colspan="7">No books yet.</td></tr>';
+}
+
+function openAdd() {
+    bookId.value = "";
+    bookForm.reset();
+
+    modalTitle.textContent = "Add Book";
+    modal.classList.add("show");
+}
+
+function openEdit(id) {
+    const b = books.find(x => x.id === id);
+
+    bookId.value = b.id;
+    title.value = b.title;
+    author.value = b.author;
+    isbn.value = b.isbn;
+    category.value = b.category;
+    quantity.value = b.quantity;
+
+    modalTitle.textContent = "Edit Book";
+    modal.classList.add("show");
+}
+
+function closeModal() {
+    modal.classList.remove("show");
+    msg.textContent = "";
+}
+
+async function removeBook(id) {
+    const confirmed = await showDeleteConfirmation();
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        await API.del("/api/books/" + id);
+
+        showNotification("Book deleted successfully", "success");
+
+        await load();
+    } catch (e) {
+        showNotification(e.message, "error");
+    }
+}
+
+function showDeleteConfirmation() {
+    return new Promise(resolve => {
+        const overlay = document.createElement("div");
+
+        overlay.className = "delete-confirm-overlay";
+
+        overlay.innerHTML = `
+            <div class="delete-confirm-box">
+                <h3>Delete Book</h3>
+
+                <p>Are you sure you want to delete this book?</p>
+
+                <div class="delete-confirm-actions">
+                    <button
+                        type="button"
+                        class="secondary"
+                        id="cancelDelete"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="button"
+                        class="danger"
+                        id="confirmDelete"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById("cancelDelete").onclick = () => {
+            overlay.remove();
+            resolve(false);
+        };
+
+        document.getElementById("confirmDelete").onclick = () => {
+            overlay.remove();
+            resolve(true);
+        };
+    });
+}
+
+bookForm.onsubmit = async e => {
+    e.preventDefault();
+    msg.textContent = "";
+
+    const data = {
+        title: title.value,
+        author: author.value,
+        isbn: isbn.value,
+        category: category.value,
+        quantity: +quantity.value
+    };
+
+    try {
+        if (bookId.value) {
+            await API.put(
+                "/api/books/" + bookId.value,
+                data
+            );
+        } else {
+            await API.post("/api/books", data);
+        }
+
+        closeModal();
+        await load();
+    } catch (e) {
+        msg.textContent = e.message;
+    }
+};
+
+(async () => {
+    await shell();
+    await load();
+})();
+        </script>
+    </body>
+
+</html>

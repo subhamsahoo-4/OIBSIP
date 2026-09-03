@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Contact Library</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Contact / Query</h1>
+                <p class="muted">Send a message to the library administration.</p>
+                <div class="card" style="max-width:700px">
+                    <form id="form">
+                        <label>Subject</label>
+                        <input id="subject" required>
+                        <label>Message</label>
+                        <textarea id="message" required></textarea>
+                        <button style="margin-top:15px">Send Message</button>
+                        <div id="msg"></div>
+                    </form>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/user.js"></script>
+        <script>
+            (async () => {
+                await userShell();
+            })();
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                msg.textContent = '';
+                try {
+                    await API.post('/api/user/contact', {
+                        subject: subject.value,
+                        message: message.value
+                    });
+                    form.reset();
+                    msg.className = 'success-msg';
+                    msg.textContent = 'Your message has been sent.';
+                } catch (err) {
+                    msg.className = 'error';
+                    msg.textContent = err.message;
+                }
+            };
+        </script>
+    </body>
+</html>

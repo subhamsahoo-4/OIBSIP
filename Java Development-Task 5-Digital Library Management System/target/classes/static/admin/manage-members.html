@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Members</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Registered Members</h1>
+                <p class="muted">Manage member accounts and activation status.</p>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/admin.js"></script>
+        <script>
+            async function load() {
+                const ms = await API.get('/api/admin/members');
+                rows.innerHTML = ms.map(m => `
+                    <tr>
+                        <td>${esc(m.name)}</td>
+                        <td>${esc(m.email)}</td>
+                        <td><span class="badge">${m.role}</span></td>
+                        <td><span class="badge ${m.active?'green':'red'}">${m.active?'Active':'Inactive'}</span></td>
+                        <td>${date(m.createdAt)}</td>
+                        <td>${m.role==='USER'?`<button class="${m.active?'danger':'success'}" onclick="toggle(${m.id},${!m.active})">${m.active?'Deactivate':'Activate'}</button>`:'—'}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6">No members found.</td></tr>';
+            }
+
+            async function toggle(id, v) {
+                try {
+                    await API.patch(`/api/admin/members/${id}/active?value=${v}`);
+                    load();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            (async () => {
+                await shell();
+                load();
+            })();
+        </script>
+    </body>
+</html>

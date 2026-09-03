@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Reservations</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>My Reservations</h1>
+                <p class="muted">Reservations are fulfilled automatically in queue order when a copy is returned.</p>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Reserved On</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/user.js"></script>
+        <script>
+            (async () => {
+                await userShell();
+                const data = await API.get('/api/user/reservations');
+                rows.innerHTML = data.map(r => `
+                    <tr>
+                        <td>${esc(r.bookTitle)}</td>
+                        <td>${date(r.createdAt)}</td>
+                        <td><span class="badge">Waiting</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="3">No active reservations.</td></tr>';
+            })();
+        </script>
+    </body>
+</html>

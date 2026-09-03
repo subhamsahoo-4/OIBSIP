@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Admin Dashboard</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Admin Dashboard</h1>
+                <p class="muted">Overview of the library.</p>
+                <div class="grid grid-4">
+                    <div class="card stat">
+                        <div class="muted">Books</div>
+                        <div id="books" class="value">—</div>
+                    </div>
+                    <div class="card stat">
+                        <div class="muted">Members</div>
+                        <div id="members" class="value">—</div>
+                    </div>
+                    <div class="card stat">
+                        <div class="muted">Active Issues</div>
+                        <div id="issues" class="value">—</div>
+                    </div>
+                    <div class="card stat">
+                        <div class="muted">Unpaid Fines</div>
+                        <div id="fines" class="value">—</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:18px">
+                    <h2>Quick actions</h2>
+                    <div class="actions">
+                        <a href="/admin/manage-books.html">
+                            <button>Add / Manage Books</button>
+                        </a>
+                        <a href="/admin/issued-books.html">
+                            <button class="secondary">View Issued Books</button>
+                        </a>
+                        <a href="/admin/fines.html">
+                            <button class="secondary">Manage Fines</button>
+                        </a>
+                        <a href="/admin/inbox.html">
+                            <button class="secondary">Open Inbox</button>
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/admin.js"></script>
+        <script>
+            (async () => {
+                await shell();
+                const [b, m, i, f] = await Promise.all([
+                    API.get('/api/books'),
+                    API.get('/api/admin/members'),
+                    API.get('/api/admin/issues'),
+                    API.get('/api/admin/fines')
+                ]);
+                books.textContent = b.length;
+                members.textContent = m.filter(x => x.role === 'USER').length;
+                issues.textContent = i.length;
+                fines.textContent = f.filter(x => !x.paid).length;
+            })();
+        </script>
+    </body>
+
+</html>

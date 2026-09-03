@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Fines</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Fine Management</h1>
+                <p class="muted">Fines are generated automatically when an overdue book is returned.</p>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Book</th>
+                                <th>Amount</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/admin.js"></script>
+        <script>
+            async function load() {
+                const data = await API.get('/api/admin/fines');
+                rows.innerHTML = data.map(f => `
+                    <tr>
+                        <td>${esc(f.memberName)}</td>
+                        <td>${esc(f.bookTitle)}</td>
+                        <td><b>${money(f.amount)}</b></td>
+                        <td>${date(f.createdAt)}</td>
+                        <td><span class="badge ${f.paid?'green':'red'}">${f.paid?'Paid':'Unpaid'}</span></td>
+                        <td>${f.paid?'—':`<button class="success" onclick="pay(${f.id})">Mark paid</button>`}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6">No fines.</td></tr>';
+            }
+
+            async function pay(id) {
+                await API.patch('/api/admin/fines/' + id + '/paid');
+                load();
+            }
+
+            (async () => {
+                await shell();
+                load();
+            })();
+        </script>
+    </body>
+</html>

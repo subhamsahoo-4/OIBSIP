@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>User Dashboard</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Welcome, <span data-user-name>Member</span></h1>
+                <p class="muted">Manage your books, reservations and fines.</p>
+                <div class="grid grid-3">
+                    <div class="card stat">
+                        <div class="muted">My active issues</div>
+                        <div id="issues" class="value">—</div>
+                    </div>
+                    <div class="card stat">
+                        <div class="muted">Reservations</div>
+                        <div id="reservations" class="value">—</div>
+                    </div>
+                    <div class="card stat">
+                        <div class="muted">Unpaid fines</div>
+                        <div id="fines" class="value">—</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:18px">
+                    <h2>Start here</h2>
+                    <div class="actions">
+                        <a href="/user/catalogue.html"><button>Browse Catalogue</button></a>
+                        <a href="/user/my-issues.html"><button class="secondary">My Issued Books</button></a>
+                        <a href="/user/contact.html"><button class="secondary">Contact Library</button></a>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/user.js"></script>
+        <script>
+            (async () => {
+                await userShell();
+                const [i, r, f] = await Promise.all([
+                    API.get('/api/user/issues'),
+                    API.get('/api/user/reservations'),
+                    API.get('/api/user/fines')
+                ]);
+                issues.textContent = i.length;
+                reservations.textContent = r.length;
+                fines.textContent = f.filter(x => !x.paid).length;
+            })();
+        </script>
+    </body>
+</html>

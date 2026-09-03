@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Library Login</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body class="auth">
+        <div class="card">
+            <h1>Digital Library</h1>
+            <p class="muted">Sign in to continue.</p>
+            <form id="form">
+                <label>Email</label>
+                <input id="email" type="email" required>
+                <label>Password</label>
+                <input id="password" type="password" required>
+                <button style="width:100%;margin-top:18px">Login</button>
+                <p class="muted">
+                    <a href="/forgot-password.html">Forgot Password?</a>
+                </p>
+                <div id="msg" class="error"></div>
+            </form>
+            <p class="muted">New member? <a href="/register.html">Create an account</a></p>
+            <hr>
+        </div>
+        <script src="/js/api.js"></script>
+        <script>
+            form.onsubmit = async e => {
+                e.preventDefault();
+                msg.textContent = '';
+                try {
+                    const m = await API.post('/api/auth/login', {
+                        email: email.value,
+                        password: password.value
+                    });
+                    location.href = m.role === 'ADMIN' ? '/admin/dashboard.html' : '/user/dashboard.html';
+                } catch (err) {
+                    msg.textContent = err.message;
+                }
+            };
+        </script>
+    </body>
+</html>

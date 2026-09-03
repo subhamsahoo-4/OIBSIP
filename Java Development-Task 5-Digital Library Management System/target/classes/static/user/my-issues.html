@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>My Issues</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>My Issued Books</h1>
+                <p class="muted">Return a book here. Overdue fines are calculated automatically at return.</p>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Issued</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top:18px">
+                    <h2>My Fines</h2>
+                    <div id="fines"></div>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/user.js"></script>
+        <script>
+            async function load() {
+                const [data, fs] = await Promise.all([
+                    API.get('/api/user/issues'),
+                    API.get('/api/user/fines')
+                ]);
+                rows.innerHTML = data.map(i => {
+                    const late = new Date(i.dueDate) < new Date();
+                    return `<tr><td>${esc(i.bookTitle)}</td><td>${date(i.issueDate)}</td><td>${date(i.dueDate)}</td><td><span class="badge ${late ? 'red' : 'green'}">${late ? 'Overdue' : 'On time'}</span></td><td><button onclick="ret(${i.id})">Return</button></td></tr>`;
+                }).join('') || '<tr><td colspan="5">No active issues.</td></tr>';
+                fines.innerHTML = fs.map(f => `<p><b>${esc(f.bookTitle)}</b> — ${money(f.amount)} <span class="badge ${f.paid ? 'green' : 'red'}">${f.paid ? 'Paid' : 'Unpaid'}</span></p>`).join('') || '<p class="muted">No fines.</p>';
+            }
+
+            async function ret(id) {
+                try {
+                    const x = await API.post('/api/user/issues/' + id + '/return');
+                    alert('Book returned successfully.');
+                    load();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            (async () => {
+                await userShell();
+                load();
+            })();
+        </script>
+    </body>
+</html>

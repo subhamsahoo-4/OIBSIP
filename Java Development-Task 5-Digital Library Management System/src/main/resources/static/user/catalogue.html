@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Catalogue</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Book Catalogue</h1>
+                <p class="muted">Search by title or author, or filter by category.</p>
+                <div class="toolbar">
+                    <input id="search" placeholder="Search title or author">
+                    <input id="category" placeholder="Category">
+                    <button onclick="load()">Search</button>
+                    <button class="secondary" onclick="clearFilters()">Clear</button>
+                </div>
+                <div id="grid" class="book-grid"></div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/user.js"></script>
+        <script>
+            async function load() {
+                const qs = new URLSearchParams();
+
+                if (search.value.trim()) {
+                    qs.set('search', search.value.trim());
+                } else if (category.value.trim()) {
+                    qs.set('category', category.value.trim());
+                }
+
+                try {
+                    const data = await API.get('/api/books?' + qs);
+
+                    grid.innerHTML = data.map(b => `
+                        <div class="card book-card">
+
+                            <h3>${esc(b.title)}</h3>
+
+                            <div class="muted">
+                                by ${esc(b.author)}
+                            </div>
+
+                            <p>
+                                <span class="badge">${esc(b.category)}</span>
+                                &nbsp; ISBN: ${esc(b.isbn)}
+                            </p>
+
+                            <p>
+                                <b>${b.availableQuantity}</b>
+                                of ${b.quantity} available
+                            </p>
+
+                            <div class="actions">
+                                ${
+                                    Number(b.availableQuantity) > 0
+                                        ? `<button onclick="issue(${b.id})">Issue Book</button>`
+                                        : `<button onclick="reserve(${b.id})">Reserve</button>`
+                                }
+                            </div>
+
+                        </div>
+                    `).join('') || '<div class="card">No books found.</div>';
+
+                } catch (e) {
+                    grid.innerHTML =
+                        `<div class="card error">${esc(e.message)}</div>`;
+                }
+            }
+            async function issue(id) {
+                try {
+                    const x = await API.post('/api/user/issues/' + id);
+
+                    showNotification(
+                        `Issued successfully. Due date: ${date(x.dueDate)}`,
+                        "success"
+                    );
+
+                    load();
+
+                } catch (e) {
+
+                    showNotification(
+                        e.message,
+                        "error"
+                    );
+                }
+            }
+
+            async function reserve(id) {
+                try {
+                    await API.post('/api/user/reservations/' + id);
+
+                    showNotification(
+                        'Reservation added to the waiting queue.',
+                        'success'
+                    );
+
+                    load();
+
+                } catch (e) {
+
+                    showNotification(
+                        e.message,
+                        'error'
+                    );
+                }
+            }
+
+            function clearFilters() {
+                search.value = '';
+                category.value = '';
+                load();
+            }
+
+            (async () => {
+                await userShell();
+                load();
+            })();
+        </script>
+    </body>
+</html>

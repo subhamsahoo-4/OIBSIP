@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Issued Books</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="layout">
+            <main class="main">
+                <h1>Issued Books</h1>
+                <p class="muted">Who has what, and whether it is due.</p>
+                <div class="card table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Member</th>
+                                <th>Issue Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+        <script src="/js/api.js"></script>
+        <script src="/js/admin.js"></script>
+        <script>
+            (async () => {
+                await shell();
+                const data = await API.get('/api/admin/issues');
+                rows.innerHTML = data.map(i => {
+                    const late = new Date(i.dueDate) < new Date();
+                    return `
+                        <tr>
+                            <td>${esc(i.bookTitle)}</td>
+                            <td>${esc(i.memberName)}</td>
+                            <td>${date(i.issueDate)}</td>
+                            <td>${date(i.dueDate)}</td>
+                            <td><span class="badge ${late?'red':'green'}">${late?'Overdue':'On time'}</span></td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="5">No active issues.</td></tr>';
+            })();
+        </script>
+    </body>
+</html>
