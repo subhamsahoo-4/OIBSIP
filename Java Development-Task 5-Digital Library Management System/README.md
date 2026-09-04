@@ -202,9 +202,9 @@ Every issued book has a loan period of:
 
 The due date is calculated as:
 
-
+```text
 Due Date = Issue Date + 14 days
-
+```
 Fine Calculation
 
 The overdue fine is:
@@ -323,6 +323,8 @@ Session management
 User status validation
 Role-based access
 📁 Project Structure
+
+
 Java Development-Task 5-Digital Library Management System/
 │
 ├── pom.xml
@@ -421,6 +423,9 @@ Java Development-Task 5-Digital Library Management System/
                 └── library/
                     ├── controller/
                     └── service/
+
+
+                    
 ⚙️ Requirements
 
 Before running the project, install:
@@ -522,6 +527,7 @@ For local/demo purposes, the application initializes an administrator account.
 Email:    admin@library.com
 Password: admin123
 Role:     ADMIN
+
 ⚠️ Important
 
 This account is intended only for development/demo purposes.
@@ -992,24 +998,6 @@ Automated Testing
 
 The project demonstrates practical implementation of Spring Boot REST APIs, Spring Security, JPA/Hibernate, MySQL, layered architecture, business-rule enforcement, design patterns, and unit testing.
 
-
-### Recommended final location
-
-Your repository should look like:
-
-```text
-OIBSIP/
-└── Java Development-Task 5-Digital Library Management System/
-    ├── README.md
-    ├── pom.xml
-    ├── schema.sql
-    └── src/
-        ├── main/
-        └── test/
-
-Then from PowerShell:
-
-cd C:\Users\subha\PRACTICE\OIBSIP
 
 git add .
 git commit -m "Update Digital Library Management System README"
