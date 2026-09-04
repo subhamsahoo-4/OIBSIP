@@ -62,7 +62,7 @@ The project follows a layered architecture using:
 ## Security
 
 - **Spring Security**
-- **BCrypt Password Encoding**
+- **BCrypt Password Hashing**
 - **Session-based Authentication**
 - **Role-Based Authorization**
 
@@ -132,7 +132,7 @@ Registered users can access library services through the user dashboard.
 - User login
 - Logout
 - Session-based authentication
-- Password encryption using BCrypt
+- Password hashing using BCrypt
 - Account status validation
 
 ### Book Catalogue
@@ -194,7 +194,7 @@ Users receive notifications for relevant library events such as:
 
 The application implements the following library rules.
 
-### Loan Period
+## Loan Period
 
 Every issued book has a loan period of:
 
@@ -205,85 +205,102 @@ The due date is calculated as:
 ```text
 Due Date = Issue Date + 14 days
 ```
-Fine Calculation
+
+## Fine Calculation
 
 The overdue fine is:
 
-₹5 per overdue day
+**₹5 per overdue day**
 
 The fine is:
 
-Calculated only when the book is returned
-Not capped at a maximum amount
-Generated only when the book is returned late
+- Calculated only when the book is returned
+- Not capped at a maximum amount
+- Generated only when the book is returned late
 
 Example:
 
+```text
 Overdue Days = 3
 Fine = 3 × ₹5
 Fine = ₹15
-Book Availability
+```
+
+## Book Availability
 
 When a book is issued:
 
+```text
 Available Copies = Available Copies - 1
+```
 
 When a book is returned:
 
+```text
 Available Copies = Available Copies + 1
-Duplicate Issues
+```
+
+## Duplicate Issues
 
 A user cannot have multiple active issues for the same book.
 
-Reservations
+## Reservations
 
 A user cannot create duplicate active reservations for the same book.
 
-FIFO Reservation
+## FIFO Reservation
 
 Reservations are fulfilled in:
 
+```text
 First In → First Out
+```
 
 The oldest pending reservation is fulfilled first when a copy becomes available.
 
-Reservation Fulfillment
+## Reservation Fulfillment
 
 When a reserved book becomes available:
 
-The oldest pending reservation is selected.
-The reservation is fulfilled.
-A new issue record is created for the user.
-The available copy is assigned to that user.
-A new 14-day loan period begins.
-The user is notified.
-Book Deletion
+1. The oldest pending reservation is selected.
+2. The reservation is fulfilled.
+3. A new issue record is created for the user.
+4. The available copy is assigned to that user.
+5. A new 14-day loan period begins.
+6. The user is notified.
 
-Books use soft deletion.
+## Book Deletion
+
+Books use **soft deletion**.
 
 A book cannot be deleted if it currently has issued copies.
 
 Deleted/inactive books:
 
-Do not appear in the normal catalogue
-Cannot be issued
-Cannot be reserved
-Book Quantity
+- Do not appear in the normal catalogue
+- Cannot be issued
+- Cannot be reserved
+
+## Book Quantity
 
 The total quantity of a book cannot be reduced below the number of currently issued copies.
 
-Member Status
+## Member Status
 
 Inactive members cannot:
 
-Log in
-Issue books
-Reserve books
-Perform normal library operations
-🏗️ Project Architecture
+- Log in
+- Issue books
+- Reserve books
+- Perform normal library operations
+
+---
+
+# 🏗️ Project Architecture
 
 The application follows a layered Spring Boot architecture.
 
+```text
 Frontend
    │
    ▼
@@ -297,34 +314,39 @@ Repositories
    │
    ▼
 MySQL Database
-Controller Layer
+```
+
+### Controller Layer
 
 Handles HTTP requests and API endpoints.
 
-Service Layer
+### Service Layer
 
 Contains business logic and validation.
 
-Repository Layer
+### Repository Layer
 
 Handles database operations using Spring Data JPA.
 
-Entity Layer
+### Entity Layer
 
 Contains JPA entities representing database tables.
 
-Security Layer
+### Security Layer
 
 Handles:
 
-Authentication
-Authorization
-Session management
-User status validation
-Role-based access
-📁 Project Structure
+- Authentication
+- Authorization
+- Session management
+- User status validation
+- Role-based access
 
+---
 
+# 📁 Project Structure
+
+```text
 Java Development-Task 5-Digital Library Management System/
 │
 ├── pom.xml
@@ -423,160 +445,237 @@ Java Development-Task 5-Digital Library Management System/
                 └── library/
                     ├── controller/
                     └── service/
+```
 
+---
 
-                    
-⚙️ Requirements
+# ⚙️ Requirements
 
 Before running the project, install:
 
-Java 17 or higher
-Maven 3.9+
-MySQL 8+
-Git
+- Java 17 or higher
+- Maven 3.9+
+- MySQL 8+
+- Git
 
 Verify the installations:
 
+```bash
 java -version
 mvn -version
 mysql --version
-🗄️ Database Setup
-1. Create the Database
+git --version
+```
+
+---
+
+# 🗄️ Database Setup
+
+## 1. Create the Database
 
 Open MySQL and run:
 
+```sql
 CREATE DATABASE library_db;
+```
 
 Select the database:
 
+```sql
 USE library_db;
-2. Run the Database Schema
+```
+
+## 2. Run the Database Schema
 
 The project contains:
 
+```text
 schema.sql
+```
 
-Execute it against the library_db database.
+Execute it against the `library_db` database.
 
 For example:
 
+```bash
 mysql -u root -p library_db < schema.sql
-🔐 Database Configuration
+```
+
+---
+
+# 🔐 Database Configuration
 
 The application uses environment variables for database credentials.
 
-The default configuration expects:
+The configuration expects:
 
+```text
 DB_URL
 DB_USERNAME
 DB_PASSWORD
+```
 
 Example:
 
+```text
 DB_URL=jdbc:mysql://localhost:3306/library_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 DB_USERNAME=root
 DB_PASSWORD=your_mysql_password
-Windows PowerShell
+```
+
+### Windows PowerShell
+
+```powershell
 $env:DB_URL="jdbc:mysql://localhost:3306/library_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
 $env:DB_USERNAME="root"
 $env:DB_PASSWORD="your_mysql_password"
+```
 
-Do not commit real database credentials to GitHub.
+Do **not** commit real database credentials to GitHub.
 
-📧 Email Configuration
+---
+
+# 📧 Email Configuration
 
 The application supports email-related functionality using configured mail credentials.
 
 Set the following environment variables:
 
+```text
 MAIL_USERNAME=your_email@gmail.com
 MAIL_PASSWORD=your_gmail_app_password
+```
 
-For Gmail, use a Google App Password rather than your normal Gmail password.
+For Gmail, use a **Google App Password** rather than your normal Gmail password.
 
 Do not commit email credentials to the repository.
 
-▶️ Running the Application
-Option 1 — Maven
+---
+
+# ▶️ Running the Application
+
+## Option 1 — Maven
 
 From the project directory:
 
+```bash
 mvn spring-boot:run
-Option 2 — Build and Run
+```
+
+## Option 2 — Build and Run
 
 Build the project:
 
+```bash
 mvn clean package
+```
 
 Then run the generated JAR:
 
+```bash
 java -jar target/<generated-jar-name>.jar
-🌐 Access the Application
+```
+
+---
+
+# 🌐 Access the Application
 
 After starting the Spring Boot application, open:
 
+```text
 http://localhost:8080/login.html
+```
 
 Registration page:
 
+```text
 http://localhost:8080/register.html
-👨‍💼 Demo Admin Account
+```
+
+---
+
+# 👨‍💼 Demo Admin Account
 
 For local/demo purposes, the application initializes an administrator account.
 
+```text
 Email:    admin@library.com
 Password: admin123
 Role:     ADMIN
+```
 
-⚠️ Important
+### ⚠️ Important
 
 This account is intended only for development/demo purposes.
 
 For production deployment:
 
-Change the default password
-Use a secure password
-Store credentials securely
-Do not expose default credentials
-🔑 Authentication & Authorization
+- Change the default password
+- Use a secure password
+- Store credentials securely
+- Do not expose default credentials
 
-The application uses Spring Security for authentication and authorization.
+---
+
+# 🔑 Authentication & Authorization
+
+The application uses **Spring Security** for authentication and authorization.
 
 Two primary roles are supported:
 
+```text
 ROLE_ADMIN
 ROLE_USER
-Admin Access
+```
+
+## Admin Access
 
 Admin endpoints are protected using:
 
+```text
 /admin/**
 /api/admin/**
-User Access
+```
+
+## User Access
 
 User endpoints are protected using:
 
+```text
 /user/**
 /api/user/**
+```
 
 Unauthenticated users can access public resources such as:
 
+```text
 /login.html
 /register.html
 /forgot-password.html
 /api/auth/**
-🔒 Password Security
+```
+
+---
+
+# 🔒 Password Security
 
 User passwords are not stored as plain text.
 
-Passwords are encrypted using:
+Passwords are stored as **BCrypt hashes** using:
 
+```text
 BCryptPasswordEncoder
+```
 
 Authentication verifies the submitted password against the BCrypt hash stored in the database.
 
-🔄 Library Workflow
-Book Issue Workflow
+---
+
+# 🔄 Library Workflow
+
+## Book Issue Workflow
+
+```text
 User Login
     ↓
 Browse Catalogue
@@ -590,7 +689,11 @@ Available Copies - 1
 Issue Record Created
     ↓
 Due Date = Issue Date + 14 Days
-Book Return Workflow
+```
+
+## Book Return Workflow
+
+```text
 User Returns Book
        ↓
 Issue Marked as Returned
@@ -608,10 +711,15 @@ Save Fine
 Check Pending Reservations
        ↓
 Fulfill Oldest Reservation
-📖 Reservation Workflow
+```
+
+---
+
+# 📖 Reservation Workflow
 
 When no copies are available:
 
+```text
 User
  ↓
 Reserve Book
@@ -619,9 +727,11 @@ Reserve Book
 Reservation Added
  ↓
 Waiting Queue
+```
 
 When a copy becomes available:
 
+```text
 Book Available
       ↓
 Find Oldest Pending Reservation
@@ -633,79 +743,105 @@ Create Issue
 Fulfill Reservation
       ↓
 Notify User
+```
 
 Reservations are processed using FIFO ordering.
 
-💰 Fine Calculation Strategy
+---
+
+# 💰 Fine Calculation Strategy
 
 The application uses a strategy-based fine calculation design.
 
 The fine calculation is represented by:
 
+```text
 FineCalculationStrategy
+```
 
 The current implementation includes:
 
+```text
 FlatRateFineStrategy
+```
 
 The current fine rate is:
 
+```text
 ₹5 per overdue day
+```
 
 This design allows additional fine calculation strategies to be introduced in the future without significantly changing the issue/return business logic.
 
-🧪 Testing
+---
+
+# 🧪 Testing
 
 The project uses:
 
-JUnit 5
-Mockito
-Spring Boot Test
+- JUnit 5
+- Mockito
+- Spring Boot Test
 
 The test suite covers important application behavior including:
 
-Book Tests
-Book creation
-Book validation
-Duplicate ISBN validation
-Book update
-Quantity validation
-Soft deletion
-Active book filtering
-Issue Tests
-Issue date calculation
-Due date calculation
-Book availability
-Duplicate active issue prevention
-Book return
-Fine calculation
-Inactive member handling
-Reservation Tests
-Reservation creation
-Duplicate reservation prevention
-FIFO reservation fulfillment
-Inactive member handling
-Reservation state changes
-Fine Tests
-Fine calculation
-Fine payment
-Duplicate payment prevention
-Controller Tests
-Book API behavior
-Request validation
-HTTP responses
-Authorization-related behavior
-✅ Test Results
+## Book Tests
+
+- Book creation
+- Book validation
+- Duplicate ISBN validation
+- Book update
+- Quantity validation
+- Soft deletion
+- Active book filtering
+
+## Issue Tests
+
+- Issue date calculation
+- Due date calculation
+- Book availability
+- Duplicate active issue prevention
+- Book return
+- Fine calculation
+- Inactive member handling
+
+## Reservation Tests
+
+- Reservation creation
+- Duplicate reservation prevention
+- FIFO reservation fulfillment
+- Inactive member handling
+- Reservation state changes
+
+## Fine Tests
+
+- Fine calculation
+- Fine payment
+- Duplicate payment prevention
+
+## Controller Tests
+
+- Book API behavior
+- Request validation
+- HTTP responses
+- Authorization-related behavior
+
+---
+
+# ✅ Test Results
 
 The current project test suite contains:
 
+```text
 27 Tests
 27 Passed
 0 Failures
 0 Errors
+```
 
 Test distribution:
 
+```text
 BookControllerTest       → 5 tests
 BookServiceTest          → 8 tests
 IssueServiceTest         → 7 tests
@@ -713,146 +849,276 @@ ReservationServiceTest   → 5 tests
 FineServiceTest          → 2 tests
 ---------------------------------
 Total                    → 27 tests
+```
 
 Run all tests using:
 
+```bash
 mvn clean test
-🔌 API Overview
-Authentication APIs
-Register
+```
+
+---
+
+# 🔌 API Overview
+
+## Authentication APIs
+
+### Register
+
+```http
 POST /api/auth/register
-Login
+```
+
+### Login
+
+```http
 POST /api/auth/login
-Current User
+```
+
+### Current User
+
+```http
 GET /api/auth/me
-Logout
+```
+
+### Logout
+
+```http
 POST /api/auth/logout
-📚 Book APIs
-Get Books
+```
+
+---
+
+# 📚 Book APIs
+
+### Get Books
+
+```http
 GET /api/books
-Get Book
+```
+
+### Get Book
+
+```http
 GET /api/books/{id}
-Add Book
+```
+
+### Add Book
+
+```http
 POST /api/books
-Update Book
+```
+
+### Update Book
+
+```http
 PUT /api/books/{id}
-Delete Book
+```
+
+### Delete Book
+
+```http
 DELETE /api/books/{id}
-📕 Issue APIs
-Get User Issues
+```
+
+---
+
+# 📕 Issue APIs
+
+### Get User Issues
+
+```http
 GET /api/user/issues
-Issue Book
+```
+
+### Issue Book
+
+```http
 POST /api/user/issues/{bookId}
-Return Book
+```
+
+### Return Book
+
+```http
 POST /api/user/issues/{issueId}/return
-Get Admin Issues
+```
+
+### Get Admin Issues
+
+```http
 GET /api/admin/issues
-💰 Fine APIs
-Get User Fines
+```
+
+---
+
+# 💰 Fine APIs
+
+### Get User Fines
+
+```http
 GET /api/user/fines
-Get Admin Fines
+```
+
+### Get Admin Fines
+
+```http
 GET /api/admin/fines
-Mark Fine as Paid
+```
+
+### Mark Fine as Paid
+
+```http
 PATCH /api/admin/fines/{id}/paid
-📌 Reservation APIs
-Reserve Book
+```
+
+---
+
+# 📌 Reservation APIs
+
+### Reserve Book
+
+```http
 POST /api/user/reservations/{bookId}
-Get User Reservations
+```
+
+### Get User Reservations
+
+```http
 GET /api/user/reservations
-📩 Contact APIs
-Submit Contact Query
+```
+
+---
+
+# 📩 Contact APIs
+
+### Submit Contact Query
+
+```http
 POST /api/user/contact
-View Contact Queries
+```
+
+### View Contact Queries
+
+```http
 GET /api/admin/contact
-🛡️ Security Features
+```
+
+---
+
+# 🛡️ Security Features
 
 The application includes several security mechanisms:
 
-Spring Security integration
-Session-based authentication
-Role-based authorization
-BCrypt password hashing
-Active/inactive member validation
-Protected Admin endpoints
-Protected User endpoints
-Unauthorized API responses
-Access-denied handling
-Session invalidation for inactive users
-Environment-based credential configuration
-🗑️ Soft Delete
+- Spring Security integration
+- Session-based authentication
+- Role-based authorization
+- BCrypt password hashing
+- Active/inactive member validation
+- Protected Admin endpoints
+- Protected User endpoints
+- Unauthorized API responses
+- Access-denied handling
+- Session invalidation for inactive users
+- Environment-based credential configuration
+
+---
+
+# 🗑️ Soft Delete
 
 Books are not physically removed from the database when deleted.
 
 Instead, their active status is changed:
 
+```text
 active = false
+```
 
 This preserves historical records such as:
 
-Previous issues
-Returns
-Fines
-Reservations
-Related database relationships
+- Previous issues
+- Returns
+- Fines
+- Reservations
+- Related database relationships
 
 Inactive books are excluded from normal catalogue operations.
 
-🔔 Notifications
+---
+
+# 🔔 Notifications
 
 The application maintains notifications for important library events.
 
 Notifications include:
 
-Issue notifications
-Return notifications
-Reservation notifications
-Reservation fulfillment
-Fine notifications
-Fine payment notifications
-Account-related notifications
+- Issue notifications
+- Return notifications
+- Reservation notifications
+- Reservation fulfillment
+- Fine notifications
+- Fine payment notifications
+- Account-related notifications
 
 Notifications track whether they have been read.
 
-🧩 Exception Handling
+---
+
+# 🧩 Exception Handling
 
 The application uses centralized exception handling for common business errors such as:
 
-Resource not found
-Invalid requests
-Duplicate operations
-Invalid book quantities
-Unavailable books
-Inactive members
-Invalid issue/return operations
-Already-paid fines
+- Resource not found
+- Invalid requests
+- Duplicate operations
+- Invalid book quantities
+- Unavailable books
+- Inactive members
+- Invalid issue/return operations
+- Already-paid fines
 
 This allows the REST API to return meaningful HTTP responses instead of exposing internal application errors.
 
-📦 Maven Commands
+---
+
+# 📦 Maven Commands
 
 Compile the project:
 
+```bash
 mvn compile
+```
 
 Run tests:
 
+```bash
 mvn test
+```
 
 Clean and test:
 
+```bash
 mvn clean test
+```
 
 Package the application:
 
+```bash
 mvn clean package
+```
 
 Run the application:
 
+```bash
 mvn spring-boot:run
-🧑‍💻 Development Workflow
+```
+
+---
+
+# 🧑‍💻 Development Workflow
 
 A typical development workflow is:
 
+```text
 Clone Repository
       ↓
 Configure MySQL
@@ -870,92 +1136,120 @@ Open Login Page
 Register/Login
       ↓
 Use Library Features
-📂 Important Files
-File	Purpose
-pom.xml	Maven dependencies and project configuration
-schema.sql	Database schema
-application.properties	Application/database/mail configuration
-LibraryApplication.java	Spring Boot entry point
-SecurityConfig.java	Spring Security configuration
-BookController.java	Book REST APIs
-IssueController.java	Issue/return APIs
-FineController.java	Fine APIs
-ReservationController.java	Reservation APIs
-ContactController.java	Contact/query APIs
-BookServiceImpl.java	Book business logic
-IssueServiceImpl.java	Issue/return business logic
-FineServiceImpl.java	Fine management
-ReservationServiceImpl.java	Reservation and FIFO fulfillment
-FlatRateFineStrategy.java	Fine calculation strategy
-⚠️ Production Considerations
+```
+
+---
+
+# 📂 Important Files
+
+| File | Purpose |
+|---|---|
+| `pom.xml` | Maven dependencies and project configuration |
+| `schema.sql` | Database schema |
+| `application.properties` | Application/database/mail configuration |
+| `LibraryApplication.java` | Spring Boot entry point |
+| `SecurityConfig.java` | Spring Security configuration |
+| `BookController.java` | Book REST APIs |
+| `IssueController.java` | Issue/return APIs |
+| `FineController.java` | Fine APIs |
+| `ReservationController.java` | Reservation APIs |
+| `ContactController.java` | Contact/query APIs |
+| `BookServiceImpl.java` | Book business logic |
+| `IssueServiceImpl.java` | Issue/return business logic |
+| `FineServiceImpl.java` | Fine management |
+| `ReservationServiceImpl.java` | Reservation and FIFO fulfillment |
+| `FlatRateFineStrategy.java` | Fine calculation strategy |
+
+---
+
+# ⚠️ Production Considerations
 
 This project is primarily intended for educational, demonstration, and internship-task purposes.
 
 Before production deployment, additional hardening should be considered, including:
 
-Enable and properly configure CSRF protection where applicable
-Use HTTPS
-Add rate limiting for authentication/password-reset endpoints
-Use stronger password policies
-Externalize and securely manage all secrets
-Add comprehensive audit logging
-Configure secure session settings
-Add database-level concurrency controls
-Add unique database constraints where required
-Improve validation for malformed requests
-Prevent account deactivation while active loans exist, or provide an appropriate administrative return workflow
-Avoid default/demo credentials in production
-🐛 Known Engineering Considerations
+- Enable and properly configure CSRF protection where applicable
+- Use HTTPS
+- Add rate limiting for authentication/password-reset endpoints
+- Use stronger password policies
+- Externalize and securely manage all secrets
+- Add comprehensive audit logging
+- Configure secure session settings
+- Add database-level concurrency controls
+- Add unique database constraints where required
+- Improve validation for malformed requests
+- Prevent account deactivation while active loans exist, or provide an appropriate administrative return workflow
+- Avoid default/demo credentials in production
+
+---
+
+# 🐛 Known Engineering Considerations
 
 The application has been tested for the core business flows. For production-scale usage, concurrency controls should be added around operations such as:
 
-Simultaneous book issue requests
-Simultaneous duplicate reservations
-Concurrent availability updates
+- Simultaneous book issue requests
+- Simultaneous duplicate reservations
+- Concurrent availability updates
 
 Database-level locking or atomic update strategies can be used to guarantee consistency under high concurrency.
 
-📸 Suggested Screenshots for GitHub
+---
+
+# 📸 Screenshots
 
 For a stronger project presentation, screenshots can be added to the repository showing:
 
-Login page
-Registration page
-Admin dashboard
-Book management
-Member management
-Fine management
-User dashboard
-Book catalogue
-Issue/return section
-Reservation section
-Contact/query form
+1. Login page
+2. Registration page
+3. Admin dashboard
+4. Book management
+5. Member management
+6. Fine management
+7. User dashboard
+8. Book catalogue
+9. Issue/return section
+10. Reservation section
+11. Contact/query form
 
 Example:
 
+```markdown
 ## Screenshots
 
 ### Login
+
 ![Login](screenshots/login.png)
 
 ### Admin Dashboard
+
 ![Admin Dashboard](screenshots/admin-dashboard.png)
 
 ### User Dashboard
+
 ![User Dashboard](screenshots/user-dashboard.png)
-📌 OIBSIP Task Information
+```
+
+---
+
+# 📌 OIBSIP Task Information
 
 This project was developed as part of the:
 
-Oasis Infobyte Internship Program (OIBSIP)
+**Oasis Infobyte Internship Program (OIBSIP)**
 
-Task
+### Task
+
+```text
 Java Development
 Task 5
 Digital Library Management System
-👨‍💻 Author
+```
 
-Subham Kumar Sahoo
+---
+
+# 👨‍💻 Author
+
+**Subham Kumar Sahoo**
 
 GitHub:
 
@@ -964,14 +1258,20 @@ https://github.com/subhamsahoo-4
 Repository:
 
 https://github.com/subhamsahoo-4/OIBSIP
-📜 License
+
+---
+
+# 📜 License
 
 This project was developed for educational and internship purposes as part of the OIBSIP Java Development Task 5.
 
-⭐ Project Summary
+---
+
+# ⭐ Project Summary
 
 The Digital Library Management System provides a complete library workflow with:
 
+```text
 Authentication
      +
 Role-Based Authorization
@@ -995,10 +1295,6 @@ Contact Management
 MySQL Persistence
      +
 Automated Testing
+```
 
-The project demonstrates practical implementation of Spring Boot REST APIs, Spring Security, JPA/Hibernate, MySQL, layered architecture, business-rule enforcement, design patterns, and unit testing.
-
-
-git add .
-git commit -m "Update Digital Library Management System README"
-git push origin main
+The project demonstrates practical implementation of **Spring Boot REST APIs, Spring Security, JPA/Hibernate, MySQL, layered architecture, business-rule enforcement, design patterns, and unit testing**.
