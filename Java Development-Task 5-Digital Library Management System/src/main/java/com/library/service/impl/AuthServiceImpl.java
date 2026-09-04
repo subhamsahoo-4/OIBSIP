@@ -3,6 +3,7 @@ package com.library.service.impl;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,9 @@ public class AuthServiceImpl implements AuthService {
     private final JavaMailSender mailSender;
     private final PasswordResetCodeRepository resetCodeRepository;
     private final NotificationService notifications;
+
+    @Value("${app.security.admin-registration-code:}")
+    private String adminRegistrationCodeConfig;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -48,6 +52,17 @@ public class AuthServiceImpl implements AuthService {
             String email,
             String password) {
 
+        return register(name, email, password, Member.Role.USER, null);
+    }
+
+    @Override
+    public Member register(
+            String name,
+            String email,
+            String password,
+            Member.Role role,
+            String adminRegistrationCode) {
+
         if (name == null ||
                 name.isBlank() ||
                 email == null ||
@@ -60,27 +75,50 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
-        if (repo.findByEmailIgnoreCase(email).isPresent()) {
+        String normalizedEmail = email.trim().toLowerCase();
 
+        if (repo.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException(
                     "Email is already registered"
             );
         }
 
+        Member.Role requestedRole = role == null ? Member.Role.USER : role;
+
+        if (requestedRole == Member.Role.ADMIN) {
+            if (adminRegistrationCodeConfig == null || adminRegistrationCodeConfig.isBlank()
+                    || adminRegistrationCode == null || !adminRegistrationCode.trim().equals(adminRegistrationCodeConfig.trim())) {
+                throw new IllegalArgumentException(
+                        "Invalid admin registration code"
+                );
+            }
+        }
+
         Member m = new Member();
 
         m.setName(name.trim());
-        m.setEmail(email.trim().toLowerCase());
+        m.setEmail(normalizedEmail);
         m.setPassword(encoder.encode(password));
-        m.setRole(Member.Role.USER);
+        m.setRole(requestedRole);
         m.setActive(true);
 
         Member saved = repo.save(m);
-        notifications.create(saved.getId(), "ACCOUNT", "Welcome to Digital Library, " + saved.getName() + "!");
-        notifications.createForAdmins("MEMBER", "New member registered: " + saved.getName() + ".");
+
+        notifications.create(
+                saved.getId(),
+                "ACCOUNT",
+                "Welcome to Digital Library, " + saved.getName() + "!"
+        );
+
+        if (requestedRole == Member.Role.USER) {
+            notifications.createForAdmins(
+                    "MEMBER",
+                    "New member registered: " + saved.getName() + "."
+            );
+        }
+
         return saved;
     }
-
 
     @Override
     public Member authenticate(

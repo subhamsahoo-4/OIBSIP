@@ -6,6 +6,8 @@ public interface AuthService {
 
     Member register(String name, String email, String password);
 
+    Member register(String name, String email, String password, Member.Role role, String adminRegistrationCode);
+
     Member authenticate(String email, String password);
 
     Member getByEmail(String email);

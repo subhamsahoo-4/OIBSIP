@@ -36,7 +36,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
     @PostMapping("/register") 
     public ResponseEntity<?> register(@RequestBody RegisterRequest r){
-        Member m=auth.register(r.name(),r.email(),r.password());
+        Member m=auth.register(r.name(),r.email(),r.password(),r.role(),r.adminRegistrationCode());
         return ResponseEntity.status(201).body(MemberResponse.from(m));
     }
     @PostMapping("/login") 
