@@ -75,8 +75,8 @@ task5-library-management/
 
 ```text
 DB_URL=jdbc:mysql://localhost:3306/library_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_USERNAME=${DB_USERNAME:root}
+DB_PASSWORD=${DB_PASSWORD}
 ```
 
 JPA creates the application tables automatically.
