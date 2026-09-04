@@ -1,3 +1,6 @@
+<img width="1917" height="927" alt="user_Dashboard" src="https://github.com/user-attachments/assets/48b763e0-45c2-4826-badb-ffef9b282ffb" />
+<img width="1916" height="1032" alt="loign" src="https://github.com/user-attachments/assets/f67c5d65-ea24-4cb5-a3c3-283c9dd04f48" />
+<img width="1917" height="927" alt="admin_Dashboard" src="https://github.com/user-attachments/assets/b3910ad7-fd4a-48e1-b526-44a93b944506" />
 # Digital Library Management System — Task 5
 
 A full-stack **Digital Library Management System** developed using **Spring Boot, MySQL, HTML, CSS, and JavaScript**.
